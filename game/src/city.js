@@ -40,10 +40,10 @@ function groundTexture(city) {
   const half = city.half;
   const toPx = (v) => ((v + half) / (2 * half)) * S;
   // Sidewalk base.
-  ctx.fillStyle = '#8a8578';
+  ctx.fillStyle = '#a89e8a';
   ctx.fillRect(0, 0, S, S);
   // Asphalt roads.
-  ctx.fillStyle = '#4e4e58';
+  ctx.fillStyle = '#6b6156';
   for (const x of city.roadXs) {
     ctx.fillRect(toPx(x - CONFIG.roadWidth / 2), 0, toPx(CONFIG.roadWidth), S);
   }
@@ -51,19 +51,19 @@ function groundTexture(city) {
     ctx.fillRect(0, toPx(z - CONFIG.roadWidth / 2), S, toPx(CONFIG.roadWidth));
   }
   // Lane dashes (canvas y is flipped vs world z; symmetric, so it does not matter).
-  ctx.fillStyle = '#8a7a44';
+  ctx.fillStyle = '#e8d878';
   for (const x of city.roadXs) {
     for (let z = -half + 8; z < half - 8; z += 16) {
-      ctx.fillRect(toPx(x) - 1, toPx(z), 1.5, 5);
+      ctx.fillRect(toPx(x) - 1, toPx(z), 2, 7);
     }
   }
   for (const z of city.roadZs) {
     for (let x = -half + 8; x < half - 8; x += 16) {
-      ctx.fillRect(toPx(x), toPx(z) - 1, 5, 1.5);
+      ctx.fillRect(toPx(x), toPx(z) - 1, 7, 2);
     }
   }
   // Crosswalks at every intersection.
-  ctx.fillStyle = '#8f8a7c';
+  ctx.fillStyle = '#d8d2c2';
   for (const x of city.roadXs) {
     for (const z of city.roadZs) {
       for (let k = -2; k <= 2; k += 1) {
@@ -136,7 +136,7 @@ export function buildCity(scene, rng) {
     fragmentShader: `varying vec3 vP; uniform vec3 top; uniform vec3 mid; uniform vec3 low;
       void main(){
         float h = normalize(vP).y;
-        vec3 c = h > 0.35 ? mix(mid, top, smoothstep(0.35, 0.8, h)) : mix(low, mid, smoothstep(0.02, 0.45, h));
+        vec3 c = h > 0.12 ? mix(mid, top, smoothstep(0.12, 0.6, h)) : mix(low, mid, smoothstep(0.0, 0.25, h));
         gl_FragColor = vec4(c, 1.0);
       }`,
   });
@@ -144,7 +144,7 @@ export function buildCity(scene, rng) {
   scene.add(sky);
 
   const sun = new THREE.DirectionalLight(CONFIG.sunColor, CONFIG.sunIntensity);
-  sun.position.set(-180, 90, -260);
+  sun.position.set(-180, 130, -260);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.camera.left = -380;
@@ -153,17 +153,25 @@ export function buildCity(scene, rng) {
   sun.shadow.camera.bottom = -380;
   sun.shadow.camera.far = 900;
   scene.add(sun);
-  scene.add(new THREE.HemisphereLight(0xffc98a, 0x3a2f2a, 1.25));
+  scene.add(new THREE.HemisphereLight(0xffc98a, 0x7a5540, 1.55));
   scene.fog = new THREE.Fog(CONFIG.fogColor, CONFIG.fogNear, CONFIG.fogFar);
 
-  // The sun disc itself, low in the west.
+  // The sun disc itself, low in the west, with a soft halo so it reads in
+  // screenshots instead of vanishing into the flat orange band.
   const sunDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(26, 32),
+    new THREE.CircleGeometry(42, 32),
     new THREE.MeshBasicMaterial({ color: 0xffe9b0, fog: false }),
   );
-  sunDisc.position.set(-560, 110, -420);
+  sunDisc.position.set(-700, 95, 300);
   sunDisc.lookAt(0, 60, 0);
   scene.add(sunDisc);
+  const sunHalo = new THREE.Mesh(
+    new THREE.CircleGeometry(85, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffc27a, fog: false, transparent: true, opacity: 0.28, depthWrite: false }),
+  );
+  sunHalo.position.set(-710, 95, 290);
+  sunHalo.lookAt(0, 60, 0);
+  scene.add(sunHalo);
 
   // ---- Ground ----
   const ground = new THREE.Mesh(

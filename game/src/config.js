@@ -57,19 +57,19 @@ export const CONFIG = {
 
   // Sunset look.
   sunColor: 0xffb36b,
-  sunIntensity: 2.4,
-  skyTop: 0x2e4a7a,
+  sunIntensity: 2.9,
+  skyTop: 0x4d6fa5,
   skyMid: 0xff9a5c,
-  skyLow: 0xf08a5e,
-  fogColor: 0xdd9a78,
-  fogNear: 260,
-  fogFar: 820,
+  skyLow: 0xffb37a,
+  fogColor: 0xe8b088,
+  fogNear: 300,
+  fogFar: 950,
 };
 
 // Colours used across the city, cars and HUD. Warm sunset palette on purpose.
 export const PALETTE = {
-  asphalt: 0x38383f,
-  sidewalk: 0x8a8578,
+  asphalt: 0x5a5148,
+  sidewalk: 0xa89e8a,
   sand: 0xdcc49a,
   sea: 0x2a7a9e,
   building: [0xcf8f6a, 0xb98a6d, 0xd9a06a, 0xa88a7a, 0xc47a5e, 0x9a7a8a],

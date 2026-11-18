@@ -1,79 +1,87 @@
-// The screenshot scenes behind ?shot=start|play|end. Each one plays the real rules forward from a
-// fresh world for a fixed number of steps, steered by a simple autopilot (look ahead each way the
-// paddle could move, keep clear of blocks, chase the lowest coin when that is safe), so the frame
-// is what a short game really looks like and the same seed always gives the same frame.
-import { FIELD, PLAYER, STEP } from './config.js';
-import { EVENT_OVER, KIND_BLOCK } from './world.js';
-import { SCREEN_OVER, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
+// SOLMAR HEAT — the screenshot scenes behind ?shot=1|2|3|4.
+// One clear job: stage a real, playable moment (a chase, a street, a mission,
+// a skyline) and hand the main loop a scripted driver for it, so the frame a
+// screenshot takes is what a short game really looks like. Same seed, same frame.
+import { CONFIG } from './config.js';
 
-const START_SECONDS = 5;
-const PLAY_SECONDS = 26;
-const END_LIMIT_SECONDS = 600;
-/**
- * How far ahead, in seconds, the autopilot checks each way it could move: the play scene's pilot
- * looks well ahead and keeps all its lives; the end scene's looks only a moment ahead, so it is
- * caught out once the blocks speed up, as a hurried player is.
- */
-const HORIZON_PLAY = 0.7;
-const HORIZON_END = 0.25;
-const SAMPLE = 1 / 30;
-const DIRECTIONS = [0, -1, 1];
-/** Extra room, each side, it keeps between the paddle and a block. */
-const MARGIN = 10;
-
-/** Seconds until moving in `direction` (-1, 0, 1) runs the paddle into a block; Infinity when it never does. */
-function timeToHit(state, direction, horizon) {
-  const player = state.player;
-  for (let t = SAMPLE; t <= horizon; t += SAMPLE) {
-    const x = Math.min(FIELD.width - player.width, Math.max(0, player.x + direction * PLAYER.speed * t));
-    for (let index = 0; index < state.items.length; index += 1) {
-      const item = state.items[index];
-      if (!item.active || item.kind !== KIND_BLOCK) continue;
-      const y = item.y + item.speed * t;
-      if (y + item.height > player.y && y < player.y + player.height && item.x < x + player.width + MARGIN && item.x + item.width > x - MARGIN) return t;
-    }
-  }
-  return Infinity;
+function putPlayerInCar(game, car) {
+  if (!game.playerCars.includes(car)) game.playerCars.push(car);
+  game.playerController.setCar(car);
+  game.player.carDamage = 0;
 }
 
-/** Of the safe ways to move, the one toward the lowest coin (or the centre); else the one that is hit last. */
-function autopilot(state, horizon) {
-  const player = state.player;
-  let coin = null;
-  for (let index = 0; index < state.items.length; index += 1) {
-    const item = state.items[index];
-    if (item.active && item.kind !== KIND_BLOCK && (coin === null || item.y > coin.y)) coin = item;
-  }
-  const target = coin === null ? FIELD.width / 2 : coin.x + coin.width / 2;
-  const centre = player.x + player.width / 2;
-  const wanted = target > centre + 8 ? 1 : target < centre - 8 ? -1 : 0;
-  let best = wanted;
-  let bestTime = timeToHit(state, wanted, horizon);
-  for (let index = 0; index < DIRECTIONS.length && bestTime !== Infinity; index += 1) {
-    const time = timeToHit(state, DIRECTIONS[index], horizon);
-    if (time > bestTime) {
-      bestTime = time;
-      best = DIRECTIONS[index];
-    }
-  }
-  return best;
+// Repaint a car bright so it reads at sunset (the parked palette is random).
+function repaint(car, color) {
+  const paint = car.group.userData.paint;
+  if (paint) paint.color.set(color);
 }
 
-/**
- * Set `world` to the named scene (start, play or end; any other name is start) and return the
- * screen to draw over it and the best score to show.
- */
-export function stageShot(name, world) {
-  world.reset();
-  if (name !== 'play' && name !== 'end') {
-    for (let index = 0; index < START_SECONDS / STEP; index += 1) world.step(STEP, 0, true);
-    return { screen: SCREEN_TITLE, best: 0 };
+export function stageShot(name, game) {
+  const city = game.city;
+  const half = CONFIG.cityHalf;
+  const player = game.player;
+  const police = game.police;
+  const missions = game.missions;
+
+  // Clear any heat and put Mara back on foot first.
+  police.reset();
+  if (player.car) game.playerController.setCar(null);
+  player.health = CONFIG.playerMaxHealth;
+  player.ammo = CONFIG.pistolAmmo;
+
+  if (name === '2') {
+    // On foot downtown, traffic and pedestrians around, the tower ahead.
+    // Mara stands on the east-west avenue looking east down the street, the
+    // Solmar Tower on her left, traffic and pedestrians in frame.
+    player.pos.set(-60, 0, -37);
+    player.angle = Math.PI / 2;
+    player.camYaw = -Math.PI / 2;
+    player.camPitch = 0.12;
+    // Bring the street to life around her: two traffic cars and three
+    // pedestrians on this avenue, so the shot is not an empty road.
+    const t = game.traffic.cars;
+    if (t[0]) { t[0].pos.set(-20, 0, -37); t[0].angle = Math.PI / 2; t[0].speed = 6; }
+    if (t[1]) { t[1].pos.set(30, 0, -37); t[1].angle = -Math.PI / 2; t[1].speed = 6; }
+    const p = game.peds.peds;
+    if (p[0]) p[0].pos.set(-30, 0, -30);
+    if (p[1]) p[1].pos.set(-10, 0, -44);
+    if (p[2]) p[2].pos.set(10, 0, -30);
+    missions.start(1);
+    return { drive: false, walk: true, seconds: 6 };
   }
-  const limit = name === 'end' ? END_LIMIT_SECONDS : PLAY_SECONDS;
-  const horizon = name === 'end' ? HORIZON_END : HORIZON_PLAY;
-  for (let index = 0; index < limit / STEP; index += 1) {
-    if (world.step(STEP, autopilot(world.state, horizon), false) & EVENT_OVER) break;
+  if (name === '3') {
+    // A getaway on the beach road: two stars, police cruisers chasing, the
+    // sunset and the sea on the left. The beach road has no lamp poles, so
+    // the chase camera has a clear view.
+    const car = game.playerCars[0];
+    repaint(car, 0x7a4fc2); // a purple coupe, distinct from the red cover car
+    car.pos.set(60, 0, 333);
+    car.angle = -Math.PI / 2;
+    car.speed = 18;
+    putPlayerInCar(game, car);
+    police.setWanted(2);
+    missions.start(2);
+    return { drive: true, walk: false, seconds: 5 };
   }
-  const over = world.state.lives === 0;
-  return { screen: over ? SCREEN_OVER : SCREEN_PLAY, best: world.state.score };
+  if (name === '4') {
+    // The skyline: the coastal road at sunset, the tower ahead, no heat.
+    const car = game.playerCars[1] || game.playerCars[0];
+    repaint(car, 0xe8b93b); // a yellow coupe, warm against the skyline
+    car.pos.set(-40, 0, 333);
+    car.angle = Math.PI; // facing north, into the city and the tower
+    car.speed = 10;
+    putPlayerInCar(game, car);
+    missions.start(3);
+    return { drive: true, walk: false, seconds: 5 };
+  }
+  // Shot 1 (default): the cover — a sunset chase on the beach road, three stars.
+  const car = game.playerCars[0];
+  repaint(car, 0xc23b2e); // a red coupe, bright against the beach road
+  car.pos.set(120, 0, 333);
+  car.angle = -Math.PI / 2; // heading west along the beach road
+  car.speed = 24;
+  putPlayerInCar(game, car);
+  police.setWanted(3);
+  missions.start(0);
+  return { drive: true, walk: false, seconds: 5 };
 }

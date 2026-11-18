@@ -1,61 +1,80 @@
-// Every tuning number and colour in one place. The playfield is a fixed 1280x720 logical area;
-// the renderer scales it to the window, so no rule below depends on the screen size.
+// SOLMAR HEAT — shared tuning and constants.
+// One clear job: every number the rest of the game agrees on lives here.
+export const CONFIG = {
+  // City layout: a grid of blocks separated by roads, with a beach and sea to the south.
+  blockSize: 60,
+  roadWidth: 14,
+  blocks: 9, // 9 x 9 blocks
+  sidewalk: 3,
+  // Derived: half the city span, used to place the sea and the world bounds.
+  cityHalf: (9 * 60 + 10 * 14) / 2, // 340
 
-export const FIELD = { width: 1280, height: 720, groundY: 664 };
+  // Player on foot.
+  walkSpeed: 7,
+  runSpeed: 11,
+  jumpSpeed: 8,
+  gravity: 22,
+  playerRadius: 0.6,
+  playerHeight: 1.8,
 
-/** The simulation's fixed step, in seconds: 60 updates a second whatever the display's rate. */
-export const STEP = 1 / 60;
+  // Driving (arcade).
+  carAccel: 26,
+  carBrake: 40,
+  carReverse: 12,
+  carMaxSpeed: 38,
+  carMaxReverse: 10,
+  carTurn: 1.9,
+  carGrip: 6,
+  carRadius: 2.2,
 
-export const PLAYER = {
-  width: 72,
-  height: 24,
-  speed: 560,
-  invulnerable: 1.5,
+  // Traffic and pedestrians.
+  trafficCount: 12,
+  trafficSpeed: 9,
+  pedCount: 26,
+  pedSpeed: 1.6,
+
+  // Wanted / police.
+  wantedMax: 5,
+  wantedDecaySeconds: 26,
+  copFootSpeed: 6.4,
+  copCarSpeed: 34,
+  bustDistance: 1.6,
+  bustSeconds: 2.5,
+
+  // Combat.
+  pistolDamage: 34,
+  pistolRange: 70,
+  pistolAmmo: 12,
+  punchDamage: 20,
+  punchRange: 2.2,
+  playerMaxHealth: 100,
+
+  // Camera.
+  camDistance: 9,
+  camHeight: 4.2,
+  driveCamDistance: 10,
+  driveCamHeight: 4.2,
+
+  // Sunset look.
+  sunColor: 0xffb36b,
+  sunIntensity: 2.4,
+  skyTop: 0x2e4a7a,
+  skyMid: 0xff9a5c,
+  skyLow: 0xf08a5e,
+  fogColor: 0xdd9a78,
+  fogNear: 260,
+  fogFar: 820,
 };
 
-export const LIVES = 3;
-
-export const BLOCK = {
-  minWidth: 40,
-  maxWidth: 110,
-  height: 36,
-  speed: 240,
-  speedPerLevel: 30,
-  speedJitter: 90,
-  interval: 0.55,
-  intervalScale: 0.88,
-  minInterval: 0.14,
-  dodgePoints: 1,
-};
-
-export const COIN = {
-  size: 24,
-  speed: 190,
-  speedPerLevel: 14,
-  interval: 1.4,
-  intervalJitter: 0.8,
-  points: 10,
-};
-
-/** Seconds of play per level, and the last level: speeds and spawn rates stop growing there. */
-export const LEVEL = { seconds: 12, max: 12 };
-
-/** How many falling things can exist at once; the pool is allocated once, at boot. */
-export const POOL_SIZE = 64;
-
+// Colours used across the city, cars and HUD. Warm sunset palette on purpose.
 export const PALETTE = {
-  backdrop: '#11141b',
-  sky: '#1b1f2a',
-  ground: '#2a3040',
-  player: '#4fc3f7',
-  block: '#e5534b',
-  coin: '#f2c94c',
-  panel: '#252b38',
-  text: '#eef1f5',
-  muted: '#8b93a3',
+  asphalt: 0x38383f,
+  sidewalk: 0x8a8578,
+  sand: 0xdcc49a,
+  sea: 0x2a7a9e,
+  building: [0xcf8f6a, 0xb98a6d, 0xd9a06a, 0xa88a7a, 0xc47a5e, 0x9a7a8a],
+  glass: 0x2c3e55,
+  car: [0xc23b2e, 0x2e6fc2, 0xe8b93b, 0x3aa655, 0xd8d8d8, 0x222222, 0x7a4fc2, 0xe07a2e],
+  police: 0x1c2f4a,
+  taxi: 0xf2c230,
 };
-
-export const FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif';
-
-/** Where the best score is kept between visits (this browser only). */
-export const BEST_KEY = 'block-dodger.best';

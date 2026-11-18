@@ -1,53 +1,77 @@
-// Keyboard and pointer input. Held keys give a steering direction; one-shot presses (start or
-// restart, pause) are queued as bit flags and taken once by the loop, so a press between two
-// frames is never lost and never counted twice.
-
-export const ACTION_CONFIRM = 1;
-export const ACTION_PAUSE = 2;
-
-const LEFT = new Set(['ArrowLeft', 'KeyA']);
-const RIGHT = new Set(['ArrowRight', 'KeyD']);
-const CONFIRM = new Set(['Space', 'Enter']);
-const PAUSE = new Set(['KeyP', 'Escape']);
-
-export function createInput(target) {
-  let left = false;
-  let right = false;
-  let actions = 0;
+// SOLMAR HEAT — keyboard and mouse input.
+// One clear job: turn browser events into a plain state object the game reads.
+// Pointer lock gives the mouse-look camera; the game never reads events directly.
+export function createInput(canvas) {
+  const keys = new Set();
+  const pressedSet = new Set();
+  const state = {
+    keys,
+    mouseDX: 0,
+    mouseDY: 0,
+    mouseDown: false,
+    locked: false,
+    // True while any of the given codes is held.
+    any(...codes) {
+      for (const code of codes) if (keys.has(code)) return true;
+      return false;
+    },
+    // True once for a key pressed since the last frame.
+    pressed(code) {
+      return pressedSet.has(code);
+    },
+  };
 
   window.addEventListener('keydown', (event) => {
-    if (LEFT.has(event.code)) left = true;
-    else if (RIGHT.has(event.code)) right = true;
-    else if (CONFIRM.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_CONFIRM;
-    } else if (PAUSE.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_PAUSE;
-    } else return;
-    event.preventDefault();
+    if (event.repeat) return;
+    keys.add(event.code);
+    pressedSet.add(event.code);
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.code)) {
+      event.preventDefault();
+    }
   });
   window.addEventListener('keyup', (event) => {
-    if (LEFT.has(event.code)) left = false;
-    else if (RIGHT.has(event.code)) right = false;
+    keys.delete(event.code);
   });
-  // A key released while the tab is hidden never sends keyup: let go of everything on blur.
   window.addEventListener('blur', () => {
-    left = false;
-    right = false;
+    keys.clear();
   });
-  target.addEventListener('pointerdown', () => {
-    actions |= ACTION_CONFIRM;
+  document.addEventListener('mousemove', (event) => {
+    if (!state.locked) return;
+    state.mouseDX += event.movementX;
+    state.mouseDY += event.movementY;
+  });
+  document.addEventListener('mousedown', (event) => {
+    if (event.button === 0) state.mouseDown = true;
+  });
+  document.addEventListener('mouseup', (event) => {
+    if (event.button === 0) state.mouseDown = false;
+  });
+  document.addEventListener('pointerlockchange', () => {
+    state.locked = document.pointerLockElement === canvas;
   });
 
   return {
-    /** -1 for left, 1 for right, 0 for neither or both. */
-    direction() {
-      return (right ? 1 : 0) - (left ? 1 : 0);
+    state,
+    lockPointer() {
+      if (document.pointerLockElement !== canvas) {
+        try {
+          // Chrome returns a promise that rejects when the lock is refused
+          // (e.g. headless); swallow it — the game still plays with keys.
+          const p = canvas.requestPointerLock();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } catch {
+          // Pointer lock can fail in headless runs; the game still plays with keys.
+        }
+      }
     },
-    /** The one-shot presses since the last call, as ACTION_* flags. */
-    takeActions() {
-      const taken = actions;
-      actions = 0;
-      return taken;
+    unlockPointer() {
+      if (document.pointerLockElement) document.exitPointerLock();
+    },
+    // Call once per frame after the game has read the state.
+    endFrame() {
+      state.mouseDX = 0;
+      state.mouseDY = 0;
+      pressedSet.clear();
     },
   };
 }

@@ -1,5 +1,1 @@
-[
-  { "name": "1-start.jpg", "query": "?shot=start&seed=1" },
-  { "name": "2-play.jpg", "query": "?shot=play&seed=1" },
-  { "name": "3-end.jpg", "query": "?shot=end&seed=1" }
-]
+[{"name":"01-sunset-chase.jpg","query":"?shot=1&seed=1","scene":"Cover: a sunset chase on the beach road, three stars, the marina coupe ahead"},{"name":"02-on-foot.jpg","query":"?shot=2&seed=1","scene":"On foot downtown, traffic and pedestrians on the avenue, the Solmar Tower ahead"},{"name":"03-getaway.jpg","query":"?shot=3&seed=1","scene":"A getaway on the beach road, two stars, police cruisers on Mara's tail"},{"name":"04-skyline.jpg","query":"?shot=4&seed=1","scene":"The skyline: the coastal road at sunset, the tower ahead, a timed run"}]

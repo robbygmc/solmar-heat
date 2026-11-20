@@ -8,6 +8,7 @@ export function createHud(game) {
   const objectiveEl = el('objective');
   const starsEl = el('stars');
   const cashEl = el('cash');
+  const musicEl = el('music');
   const healthFill = el('health-fill');
   const speedEl = el('speed');
   const ammoEl = el('ammo');
@@ -159,10 +160,17 @@ export function createHud(game) {
       starsEl.textContent = '★'.repeat(w) + '☆'.repeat(CONFIG.wantedMax - w);
       starsEl.style.color = w >= 3 ? '#ff5040' : w > 0 ? '#ffc23b' : '#888888';
       cashEl.textContent = `$${p.cash.toLocaleString('en-US')}`;
+      if (musicEl) {
+        const on = game.audio ? game.audio.musicOn() : false;
+        musicEl.textContent = on ? '♪ MUSIC ON' : '♪ MUSIC OFF';
+        musicEl.style.opacity = on ? '0.9' : '0.45';
+      }
       healthFill.style.width = `${Math.max(0, p.health)}%`;
       healthFill.style.background = p.health > 50 ? '#3aa655' : p.health > 25 ? '#e8b93b' : '#c23b2e';
       speedEl.textContent = p.car ? `${Math.round(Math.abs(p.car.speed) * 3.6)} km/h` : '';
       ammoEl.textContent = `◉ ${p.ammo} / ${CONFIG.pistolAmmo}`;
+      // No crosshair while driving: the pistol only fires on foot.
+      crosshair.style.display = game.screen === 'play' && !p.car ? 'block' : 'none';
       drawMinimap();
       updateCompass(camera);
     },

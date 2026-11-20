@@ -56,6 +56,7 @@ export function createPedestrians(scene, city, rng) {
       state: 'walk',
       target: null,
       scareTimer: 0,
+      downTimer: 0,
       swing: rng.range(0, 6),
       health: 100,
     };
@@ -109,9 +110,14 @@ export function createPedestrians(scene, city, rng) {
     update(dt) {
       for (const ped of peds) {
         if (ped.state === 'down') {
-          // Fallen: lying on the ground, fading out after a while.
+          // Fallen: lying on the ground, fading out after a while — sink
+          // below the street after 6s, removed entirely after 8s (see the
+          // sweep at the end of update).
+          ped.downTimer += dt;
           ped.group.rotation.x = Math.max(-Math.PI / 2, ped.group.rotation.x - dt * 4);
-          ped.group.position.y = Math.max(0.25, ped.group.position.y - dt);
+          ped.group.position.y = ped.downTimer > 6
+            ? Math.max(-1.2, ped.group.position.y - dt * 0.8)
+            : Math.max(0.25, ped.group.position.y - dt);
           continue;
         }
         if (ped.scareTimer > 0) {
@@ -145,6 +151,14 @@ export function createPedestrians(scene, city, rng) {
         ped.swing += dt * speed * 2.4;
         ped.legL.rotation.x = Math.sin(ped.swing) * 0.6;
         ped.legR.rotation.x = -Math.sin(ped.swing) * 0.6;
+      }
+      // Sweep out peds that finished fading — splicing here, after the loop,
+      // so the iteration above is never disturbed.
+      for (let i = peds.length - 1; i >= 0; i -= 1) {
+        if (peds[i].state === 'down' && peds[i].downTimer > 8) {
+          scene.remove(peds[i].group);
+          peds.splice(i, 1);
+        }
       }
     },
     // Knock a pedestrian down (combat). Returns true when they went down.

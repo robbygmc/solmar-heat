@@ -66,6 +66,11 @@ createServer((request, response) => {
     'content-length': size,
     'cache-control': 'no-store',
   });
+  // HEAD asks for the headers only; piping a body would violate the method.
+  if (request.method === 'HEAD') {
+    response.end();
+    return;
+  }
   createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
   console.log(`game/ is on http://localhost:${port}`);

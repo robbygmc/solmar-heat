@@ -49,6 +49,10 @@ export const CONFIG = {
   punchRange: 2.2,
   playerMaxHealth: 100,
 
+  // Music: the "Sunset over Solmar" synth loop (see audio.js).
+  musicLevel: 0.14,
+  musicDuckLevel: 0.05,
+
   // Camera.
   camDistance: 9,
   camHeight: 4.2,

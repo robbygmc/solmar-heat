@@ -26,6 +26,8 @@ Then open http://localhost:8080 in a desktop browser. No build step, no network 
 | E | Enter / exit a car, pick up |
 | F | Punch |
 | Click | Shoot the pistol |
+| R | Reload the pistol |
+| M | Toggle the music loop |
 | Space | Handbrake |
 | P / Esc | Pause |
 
@@ -39,7 +41,7 @@ Then open http://localhost:8080 in a desktop browser. No build step, no network 
 - **Combat:** punch and a pistol with ammo, muzzle flash, tracers and hit sparks.
 - **HUD:** live minimap (roads, player arrow, mission marker, police blips, north), compass to the objective, wanted stars, cash, health, speed and ammo.
 - **Save:** cash, mission progress, position, health and ammo persist in localStorage; continue from the title screen.
-- **Sound:** WebAudio synth — engine hum, sirens, gunshots, crashes and mission chimes. No audio files.
+- **Sound:** WebAudio synth — engine hum, sirens, gunshots, crashes and mission chimes, plus an original synth music loop, "Sunset over Solmar" (M toggles it). No audio files.
 
 ## Layout
 

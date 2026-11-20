@@ -214,19 +214,6 @@ export function createTraffic(scene, city, rng) {
         for (const wheel of car.wheels) wheel.rotation.x += (car.speed * dt) / 0.42;
       }
     },
-    // A parked car near a point (for stealing), or null.
-    nearestParked(x, z, maxDist) {
-      let best = null;
-      let bestD = maxDist;
-      for (const car of cars) {
-        const d = Math.hypot(car.pos.x - x, car.pos.z - z);
-        if (d < bestD) {
-          bestD = d;
-          best = car;
-        }
-      }
-      return best;
-    },
   };
 }
 

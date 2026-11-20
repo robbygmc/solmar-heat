@@ -13,6 +13,7 @@
   #stats { position: absolute; top: 12px; right: 18px; text-align: right; }
   #stars { font-size: 26px; letter-spacing: 2px; }
   #cash { font-size: 22px; font-weight: 700; color: #7de07a; }
+  #music { font-size: 14px; color: #ffc23b; opacity: .85; margin-top: 2px; }
   #minimap { position: absolute; left: 16px; bottom: 16px; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,.55); border-radius: 4px; background: rgba(12,16,24,.8); }
   #vitals { position: absolute; right: 18px; bottom: 16px; text-align: right; }
   #health { width: 220px; height: 12px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.6); border-radius: 3px; margin-left: auto; }
@@ -39,11 +40,12 @@
 </script>
 </head>
 <body>
+<noscript><p style="color:#fff;text-align:center;padding:40px;font-family:system-ui,sans-serif">SOLMAR HEAT needs JavaScript to run — please enable it and reload.</p></noscript>
 <canvas id="game" aria-label="SOLMAR HEAT: an open-world crime game. Explore Solmar on foot and by car, steal cars, outrun the police and run jobs for Dante Cruz."></canvas>
 
 <div id="hud">
   <div id="objective"></div>
-  <div id="stats"><div id="stars">☆☆☆☆☆</div><div id="cash">$150</div></div>
+  <div id="stats"><div id="stars">☆☆☆☆☆</div><div id="cash">$150</div><div id="music">♪</div></div>
   <canvas id="minimap" width="200" height="200"></canvas>
   <div id="vitals">
     <div id="health"><div id="health-fill"></div></div>
@@ -57,10 +59,10 @@
 
 <div class="screen" id="screen-title">
   <h1>SOLMAR HEAT</h1>
-  <p>Sun, sea, and a debt to pay. Mara Voss is the best getaway driver in Solmar — and Dante Cruz owns her next five jobs. Steal cars, outrun the Solmar PD, and run the jobs. The city is yours.</p>
+  <p>One night. Five jobs. Mara Voss is the best getaway driver in Solmar — and Dante Cruz owns her debt. Tonight it comes due: run the jobs, lose the heat, bring the casino's van home, and the city is hers. The sun is going down. The crew is waiting. The debt is due at dawn.</p>
   <div class="controls">
     <b>W A S D</b> move &nbsp;·&nbsp; <b>Mouse</b> look &nbsp;·&nbsp; <b>Shift</b> run &nbsp;·&nbsp; <b>Space</b> jump / handbrake<br>
-    <b>E</b> steal / enter car &nbsp;·&nbsp; <b>F</b> punch &nbsp;·&nbsp; <b>Click</b> shoot &nbsp;·&nbsp; <b>R</b> reload &nbsp;·&nbsp; <b>P</b> pause
+    <b>E</b> steal / enter car &nbsp;·&nbsp; <b>F</b> punch &nbsp;·&nbsp; <b>Click</b> shoot &nbsp;·&nbsp; <b>R</b> reload &nbsp;·&nbsp; <b>M</b> music &nbsp;·&nbsp; <b>P</b> pause
   </div>
   <div>
     <button id="btn-start">NEW GAME</button>

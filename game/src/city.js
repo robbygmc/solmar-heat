@@ -258,7 +258,10 @@ export function buildCity(scene, rng) {
           scene.add(cont);
           addCollider(cont.position.x, cont.position.z, w, 2.6);
         }
-        city.landmarks.port = { x: bx, z: bz };
+        // The landmark must sit in the walkable gap between the container rows
+        // (z ≈ bz - 6), not on a container: the old (bx, bz) point fell inside
+        // a container's footprint, so nobody could ever stand on the objective.
+        city.landmarks.port = { x: bx, z: bz - 6 };
         continue;
       }
       const count = isHotelRow ? 2 : rng.int(1, 3);
@@ -392,7 +395,10 @@ export function buildCity(scene, rng) {
   return city;
 }
 
-// One palm: a leaning trunk and a flattened cone crown. Two meshes, cheap.
+// One palm: a leaning trunk and a flattened sphere crown. The crown used to
+// be a 7-sided cone: with the sun low, one facet caught no light and read as
+// a hard black triangle against the sky. A smooth sphere shades as a soft
+// gradient instead, so no single face can go black.
 function addPalm(scene, x, z, rng) {
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.22, 0.34, 7, 6),
@@ -403,7 +409,7 @@ function addPalm(scene, x, z, rng) {
   trunk.castShadow = true;
   scene.add(trunk);
   const crown = new THREE.Mesh(
-    new THREE.ConeGeometry(3.2, 2.4, 7),
+    new THREE.SphereGeometry(3.0, 10, 8),
     new THREE.MeshStandardMaterial({ color: 0x2e6b34, roughness: 1 }),
   );
   crown.position.set(x, 7.6, z);

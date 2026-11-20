@@ -77,11 +77,6 @@ export function createPlayer(scene, city, input, start) {
     invulnerable: 0,
   };
 
-  function carCircles() {
-    // Every car in the world except the one being driven, for on-foot push-out.
-    return [];
-  }
-
   return {
     player,
     // The car Mara is driving, or null.
@@ -212,7 +207,6 @@ export function createPlayer(scene, city, input, start) {
       const speedFactor = Math.min(1, Math.abs(car.speed) / 12);
       const turn = CONFIG.carTurn * speedFactor * (handbrake ? 1.7 : 1) * (car.speed >= 0 ? 1 : -1);
       car.angle += steerInput * turn * dt;
-      const before = { x: car.pos.x, z: car.pos.z };
       const hit = stepCar(game.city, car, dt);
       if (hit && Math.abs(car.speed) > 6) {
         player.carDamage = Math.min(100, player.carDamage + 4);
@@ -249,7 +243,6 @@ export function createPlayer(scene, city, input, start) {
       if (player.carDamage > 55 && Math.random() < 0.3) {
         puff(car.pos.x, 1.2, car.pos.z, true);
       }
-      void before;
     },
     // Third-person camera: orbit on foot, chase cam while driving.
     updateCamera(dt, camera) {

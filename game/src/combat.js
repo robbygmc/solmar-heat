@@ -73,6 +73,10 @@ export function createCombat(scene, game) {
     for (const car of game.traffic.cars) {
       test(new THREE.Vector3(car.pos.x, 0.9, car.pos.z), 2.4, { kind: 'car', car });
     }
+    // Parked cars too — a shot at one should spark, not pass through it.
+    for (const car of game.playerCars) {
+      test(new THREE.Vector3(car.pos.x, 0.9, car.pos.z), 2.4, { kind: 'car', car });
+    }
     for (const pc of game.police.cars) {
       test(new THREE.Vector3(pc.car.pos.x, 0.9, pc.car.pos.z), 2.4, { kind: 'policeCar', car: pc.car });
     }

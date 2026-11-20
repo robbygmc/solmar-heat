@@ -73,6 +73,25 @@ export function createPolice(scene, city, rng, game) {
       Math.max(-300, Math.min(300, near.z + Math.cos(a) * 40)),
     );
     unit.car.angle = a;
+    unit.car.group.position.copy(unit.car.pos);
+    unit.car.group.rotation.y = unit.car.angle;
+    cars.push(unit);
+    return unit;
+  }
+
+  // Place one cruiser at an exact spot, facing an exact heading — used by
+  // staged shots so the PD is visibly in frame instead of spawning at a
+  // random angle behind the camera.
+  function placeCruiser(x, z, angle) {
+    const unit = createPoliceCar(scene);
+    unit.car.pos.set(x, 0, z);
+    unit.car.angle = angle;
+    unit.car.speed = 20;
+    // Sync the mesh at spawn, like createParkedCar does: the update loop
+    // would do it on the next frame, but the placed car must read correctly
+    // from the first render.
+    unit.car.group.position.copy(unit.car.pos);
+    unit.car.group.rotation.y = unit.car.angle;
     cars.push(unit);
     return unit;
   }
@@ -92,6 +111,7 @@ export function createPolice(scene, city, rng, game) {
   return {
     footCops,
     cars,
+    placeCruiser,
     get wanted() {
       return wanted;
     },

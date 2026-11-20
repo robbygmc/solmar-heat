@@ -16,6 +16,25 @@ function repaint(car, color) {
   if (paint) paint.color.set(color);
 }
 
+// The parked car at (-60, 333) sits in the middle of the beach road, right
+// in the chase line: a cruiser (and the player) rear-end it ~3s into shots 1
+// and 3. Move it onto the sand south of the road for the shot, where it reads
+// as beach parking and nothing can hit it.
+function clearBeachRoad(game) {
+  for (const car of game.playerCars) {
+    if (Math.abs(car.pos.x + 60) < 3 && Math.abs(car.pos.z - 333) < 3) {
+      car.pos.set(-60, 0, 352);
+      car.angle = -Math.PI / 2;
+      car.speed = 0;
+      // Parked cars are never re-synced from pos (only stepCar does that,
+      // and this car is not being driven), so move the mesh too — otherwise
+      // the car still renders mid-beach-road and the chase still hits it.
+      car.group.position.set(-60, 0, 352);
+      car.group.rotation.y = car.angle;
+    }
+  }
+}
+
 export function stageShot(name, game) {
   const city = game.city;
   const half = CONFIG.cityHalf;
@@ -53,6 +72,7 @@ export function stageShot(name, game) {
     // A getaway on the beach road: two stars, police cruisers chasing, the
     // sunset and the sea on the left. The beach road has no lamp poles, so
     // the chase camera has a clear view.
+    clearBeachRoad(game);
     const car = game.playerCars[0];
     repaint(car, 0x7a4fc2); // a purple coupe, distinct from the red cover car
     car.pos.set(60, 0, 333);
@@ -60,6 +80,11 @@ export function stageShot(name, game) {
     car.speed = 18;
     putPlayerInCar(game, car);
     police.setWanted(2);
+    // One cruiser placed ahead on the sea side, driving at Mara head-on:
+    // at the 1.5s capture it is closing in the left of the frame, so the
+    // getaway visibly has the PD in it (random spawns land behind the
+    // camera and never show). The update loop keeps it at one cruiser.
+    police.placeCruiser(-60, 340, Math.PI / 2);
     missions.start(2);
     return { drive: true, walk: false, seconds: 5 };
   }
@@ -75,6 +100,7 @@ export function stageShot(name, game) {
     return { drive: true, walk: false, seconds: 5 };
   }
   // Shot 1 (default): the cover — a sunset chase on the beach road, three stars.
+  clearBeachRoad(game);
   const car = game.playerCars[0];
   repaint(car, 0xc23b2e); // a red coupe, bright against the beach road
   car.pos.set(120, 0, 333);

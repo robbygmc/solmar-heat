@@ -179,7 +179,10 @@ export function createMissions(scene, city, game) {
       game.audio?.complete();
       game.save?.();
       startMission(state.index + 1);
-      if (state.index >= MISSIONS.length) {
+      // startMission leaves state.index on the last mission when there is no
+      // next one, so test state.done (set by startMission) instead — the old
+      // index test could never fire and the story toast was dead.
+      if (state.done) {
         game.toast('STORY COMPLETE: The debt is paid. Solmar is yours — free roam.', 7);
       }
     } else {

@@ -1,6 +1,8 @@
 // SOLMAR HEAT — deterministic randomness.
 // One clear job: a seeded generator so the same seed always builds the same city
-// and the same screenshot scenes. No Math.random anywhere in the game.
+// and the same screenshot scenes. All gameplay and city randomness comes from
+// here; the only Math.random uses are cosmetic (audio noise, spark velocities,
+// smoke puffs) and never touch game state.
 export function mulberry32(seed) {
   let a = seed >>> 0;
   return function next() {

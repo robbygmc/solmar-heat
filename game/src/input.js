@@ -34,6 +34,10 @@ export function createInput(canvas) {
   });
   window.addEventListener('blur', () => {
     keys.clear();
+    pressedSet.clear();
+    // A mouse button released off-window never fires mouseup here, so a
+    // stuck mouseDown would keep firing the pistol on return.
+    state.mouseDown = false;
   });
   document.addEventListener('mousemove', (event) => {
     if (!state.locked) return;

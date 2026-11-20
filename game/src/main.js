@@ -91,6 +91,7 @@ const game = {
     if (this.screen !== 'play') return;
     this.screen = 'busted';
     audio.busted();
+    audio.duckMusic(true);
     input.unlockPointer();
     this.police.reset();
     this.player.cash = Math.max(0, this.player.cash - 300);
@@ -100,6 +101,7 @@ const game = {
     if (this.screen !== 'play') return;
     this.screen = 'wasted';
     audio.busted();
+    audio.duckMusic(true);
     input.unlockPointer();
     this.police.reset();
     this.player.cash = Math.max(0, this.player.cash - 200);
@@ -115,6 +117,7 @@ const game = {
     this.player.carDamage = 0;
     this.screen = 'play';
     this.hud.show('play');
+    audio.duckMusic(false);
     input.lockPointer();
     this.save();
   },
@@ -155,6 +158,7 @@ function applySave(data) {
 
 function startGame(useSave) {
   audio.ensure();
+  audio.startMusic();
   if (useSave && saved) {
     applySave(saved);
     game.missions.start(saved.missionDone ? MISSIONS_DONE : saved.missionIndex);
@@ -170,6 +174,7 @@ function startGame(useSave) {
 function resumeGame() {
   game.screen = 'play';
   game.hud.show('play');
+  audio.duckMusic(false);
   input.lockPointer();
 }
 
@@ -177,6 +182,7 @@ function pauseGame() {
   if (game.screen !== 'play') return;
   game.screen = 'pause';
   game.hud.show('pause');
+  audio.duckMusic(true);
   input.unlockPointer();
   game.save();
 }
@@ -198,6 +204,11 @@ function handleActions() {
     else if (game.screen === 'pause') resumeGame();
   }
   if (game.screen !== 'play') return;
+
+  if (st.pressed('KeyM')) {
+    const on = audio.toggleMusic();
+    game.toast(on ? 'Music on — Sunset over Solmar ♪' : 'Music off', 2);
+  }
 
   if (st.pressed('KeyE')) {
     if (player.car) {

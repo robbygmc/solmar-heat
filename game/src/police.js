@@ -211,8 +211,16 @@ export function createPolice(scene, city, rng, game) {
       // Cruisers chase and ram.
       for (const unit of cars) {
         const dist = unit.update(dt, target, city);
-        // Ramming the player's car hurts it.
-        if (player.car && dist < 4.5) {
+        // Ramming the player's car hurts it — once per cruiser per half
+        // second. Per-frame damage (no cooldown) shredded a fresh car in
+        // ~2s of contact and pinned it (speed x0.92 every frame), which made
+        // mission 3 unwinnable once cruisers caught up: a 100-damage car
+        // tops out at 19 u/s against 34 u/s cruisers, so the wanted level
+        // could never cool down. A ram is a hit, not a shredder — the foot
+        // cops already punch on a 0.9s cooldown for the same reason.
+        unit.ramTimer = (unit.ramTimer ?? 0) - dt;
+        if (player.car && dist < 4.5 && unit.ramTimer <= 0) {
+          unit.ramTimer = 0.5;
           player.car.speed *= 0.92;
           game.playerCarDamage(1);
         }

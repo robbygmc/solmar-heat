@@ -73,6 +73,7 @@ export function createPlayer(scene, city, input, start) {
     camPitch: 0.32,
     walkSwing: 0,
     punchTimer: 0,
+    bumpTimer: 0,
     shootCooldown: 0,
     invulnerable: 0,
   };
@@ -105,6 +106,7 @@ export function createPlayer(scene, city, input, start) {
       player.invulnerable = Math.max(0, player.invulnerable - dt);
       player.shootCooldown = Math.max(0, player.shootCooldown - dt);
       player.punchTimer = Math.max(0, player.punchTimer - dt);
+      player.bumpTimer = Math.max(0, player.bumpTimer - dt);
 
       // Mouse look.
       player.camYaw -= inputState.mouseDX * 0.0032;
@@ -214,7 +216,12 @@ export function createPlayer(scene, city, input, start) {
         puff(car.pos.x, 1, car.pos.z, true);
         game.audio?.crash();
       }
-      // Car-car bumps.
+      // Car-car bumps: push the cars apart every frame, but the damage and
+      // the speed hit are once per half second, not per frame. Per-frame
+      // they shredded a fresh car in ~4s of cruiser contact (2 damage and
+      // speed x0.7 every frame) and pinned it at the sea bound, making
+      // mission 3 unwinnable — the same class of bug as the police ram,
+      // which already got a cooldown. A bump is a hit, not a shredder.
       for (const other of game.allCars()) {
         if (other === car) continue;
         const dx = car.pos.x - other.pos.x;
@@ -226,9 +233,12 @@ export function createPlayer(scene, city, input, start) {
           car.pos.z += (dz / d) * push;
           other.pos.x -= (dx / d) * push;
           other.pos.z -= (dz / d) * push;
-          car.speed *= 0.7;
-          if (other.speed !== undefined) other.speed *= 0.7;
-          player.carDamage = Math.min(100, player.carDamage + 2);
+          if (player.bumpTimer <= 0) {
+            player.bumpTimer = 0.5;
+            car.speed *= 0.7;
+            if (other.speed !== undefined) other.speed *= 0.7;
+            player.carDamage = Math.min(100, player.carDamage + 2);
+          }
         }
       }
       player.pos.copy(car.pos);

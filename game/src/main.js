@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { CONFIG } from './config.js';
 import { makeRng } from './random.js';
 import { createInput } from './input.js';
-import { buildCity } from './city.js';
+import { buildCity, resolveCircleCollisions } from './city.js';
 import { createTraffic } from './vehicles.js';
 import { createPedestrians } from './pedestrians.js';
 import { createPlayer, createParkedCar } from './player.js';
@@ -212,11 +212,25 @@ function handleActions() {
 
   if (st.pressed('KeyE')) {
     if (player.car) {
-      // Get out: step to the side of the car.
+      // Get out: step to the side of the car — on the side that is NOT
+      // inside a building. The old code always stepped to the same side,
+      // which could drop Mara inside a building collider: the hotel delivery
+      // leaves the car against the hotel wall, and the exit put her in the
+      // concave corner between two overlapping hotel buildings, where every
+      // walk step was cancelled and the foot cops beat her to death while
+      // she was pinned (playtest run 11). Resolve both sides out of the
+      // colliders and take the side that needed the smaller push.
       const car = player.car;
       car.speed = 0;
       playerController.setCar(null);
-      player.pos.set(car.pos.x + Math.cos(car.angle) * 2.4, 0, car.pos.z - Math.sin(car.angle) * 2.4);
+      const sx = Math.cos(car.angle);
+      const sz = -Math.sin(car.angle);
+      const a = resolveCircleCollisions(game.city, car.pos.x + sx * 2.4, car.pos.z + sz * 2.4, CONFIG.playerRadius);
+      const b = resolveCircleCollisions(game.city, car.pos.x - sx * 2.4, car.pos.z - sz * 2.4, CONFIG.playerRadius);
+      const da = Math.hypot(a.x - (car.pos.x + sx * 2.4), a.z - (car.pos.z + sz * 2.4));
+      const db = Math.hypot(b.x - (car.pos.x - sx * 2.4), b.z - (car.pos.z - sz * 2.4));
+      const pick = da <= db ? a : b;
+      player.pos.set(pick.x, 0, pick.z);
       player.angle = car.angle;
     } else if (game.missions.interact(player)) {
       // A pickup step handled it.

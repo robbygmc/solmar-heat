@@ -235,7 +235,10 @@ export function createPlayer(scene, city, input, start) {
           other.pos.z -= (dz / d) * push;
           if (player.bumpTimer <= 0) {
             player.bumpTimer = 0.5;
-            car.speed *= 0.7;
+            // No speed cut here: the push-apart above is the physical
+            // response, and a 30% cut per bump pinned the car under the
+            // cruisers (run 13: the fresh car could never re-accelerate
+            // past them). The damage alone is the cost of the bump.
             if (other.speed !== undefined) other.speed *= 0.7;
             player.carDamage = Math.min(100, player.carDamage + 2);
           }

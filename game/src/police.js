@@ -221,7 +221,11 @@ export function createPolice(scene, city, rng, game) {
         unit.ramTimer = (unit.ramTimer ?? 0) - dt;
         if (player.car && dist < 4.5 && unit.ramTimer <= 0) {
           unit.ramTimer = 0.5;
-          player.car.speed *= 0.92;
+          // A light speed cost, not a pin: x0.92 per hit kept the car
+          // below the cruisers' pace while they were glued on (run 13),
+          // so it could never break away. With the car's 26 u/s^2
+          // acceleration it now recovers between hits and pulls clear.
+          player.car.speed *= 0.96;
           game.playerCarDamage(1);
         }
         // A cruiser that catches Mara on foot drops a cop.
